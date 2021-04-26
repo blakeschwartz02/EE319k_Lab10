@@ -4,7 +4,11 @@
 // Jonathan Valvano
 // 1/16/2021
 #include <stdint.h>
+#include "../inc/tm4c123gh6pm.h"
+#include "../inc/LaunchPad.h"
+#include "../inc/CortexM.h"
 #include "Sound.h"
+#include "TExaS.h"
 #include "DAC.h"
 // these are sampled at 8 bits 11kHz
 // If your DAC is less than 8 bits you will need to scale the data
@@ -1140,8 +1144,11 @@ const uint8_t highpitch[1802] = {
 // define a background task to run at 11 kHz, which outputs one value to DAC each interrupt
   
 void Sound_Init(void){
-// write this
-  // initialize a 11kHz timer, and the DAC
+	DAC_Init();
+	
+  NVIC_ST_CTRL_R = 0;
+	NVIC_ST_CURRENT_R = 0;
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R&0x00FFFFFF)|0x20000000;
 };
 
 //******* Sound_Start ************
@@ -1155,5 +1162,6 @@ void Sound_Init(void){
 // special cases: as you wish to implement
 void Sound_Start(const uint8_t *pt, uint32_t count){
 // write this
+
 };
 
