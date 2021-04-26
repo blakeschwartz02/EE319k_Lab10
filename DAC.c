@@ -19,7 +19,15 @@
 // Input: none
 // Output: none
 void DAC_Init(void){
+	SYSCTL_RCGCGPIO_R |= 0x02; // Port B 
+	
+	__asm__ {
+		NOP
+		NOP
+	}
 
+	GPIO_PORTB_DIR_R |= 0x3F; // make PB5-0 outputs 
+	GPIO_PORTB_DEN_R |= 0x3F; // make PB5-0 digital 
 }
 
 // **************DAC_Out*********************
@@ -28,4 +36,5 @@ void DAC_Init(void){
 // Input=n is converted to n*3.3V/15
 // Output: none
 void DAC_Out(uint32_t data){
+	GPIO_PORTB_DATA_R = data;
 }
