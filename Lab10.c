@@ -85,6 +85,16 @@ void Profile_Init(void){
   GPIO_PORTB_DEN_R |=  0x30;   // enable on PB4 PB5  
 }
 //********************************************************************************
+
+typedef enum {dead,alive} status_t; 
+struct sprite{
+	uint32_t x; 
+	uint32_t y; 
+	const uint8_t *image;
+	status_t life; 
+};
+typedef struct sprite sprite_t; 
+
  
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
