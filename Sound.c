@@ -1163,5 +1163,6 @@ void Sound_Init(void){
 void Sound_Start(const uint8_t *pt, uint32_t count){
 // write this
 
+	NVIC_ST_CTRL_R = 7; // ENABLE, INTEN, CLK SRC
 };
 
