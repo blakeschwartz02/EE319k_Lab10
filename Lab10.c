@@ -86,16 +86,60 @@ void Profile_Init(void){
 }
 //********************************************************************************
 
-typedef enum {dead,alive} status_t; 
 struct sprite{
-	uint32_t x; 
-	uint32_t y; 
+	int32_t x; 
+	int32_t y; 
 	const uint8_t *image;
-	status_t life; 
+	int32_t vx, vy; 
 };
 typedef struct sprite sprite_t; 
 
- 
+sprite_t Car[1]; 
+
+void CarInit(void){ int i; 
+		Car[i].x = 0; 
+	  Car[i].y = 64; 
+	  Car[i].vx = 0;
+	  Car[i].vy = 0;
+}
+
+sprite_t ParkingSpot[3];
+
+
+struct State{
+	const unsigned char *out; // output for Sprite
+//	uint32_t out; // output for Sprite
+//	uint32_t outSP; // output for slide pot 
+	uint32_t next[8]; 
+};
+
+typedef const struct State State_t; 
+
+#define N 0 
+#define NE 1 
+#define E 2 
+#define SE 3 
+#define S 4 
+#define SW 5 
+#define W 6 
+#define NW 7 
+
+State_t FSM[8] = {
+// out   000 001 010 011 100 101 110 111 
+	{CarN, {N, NW, NE, N, N, NE, NW, N}},
+	{CarNE, {NE, N, E, NE, NE, E, N, NE}},
+	{CarE, {E, NE, SE, E, E, SE, NE, E}},
+	{CarSE, {SE, E, S, SE, SE, S, E, SE}},
+	{CarS, {S, SE, SW, S, S, SW, SE, S}},
+	{CarSW, {SW, S, W, SW, SW, W, S, SW}},
+	{CarW, {W, SW, NW, W, W, NW, SW, W}},
+	{CarNW, {NW, W, N, NW, NW, N, W, NW}}
+};
+	
+
+
+
+
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
 int main(void){uint32_t time=0;
@@ -110,21 +154,36 @@ int main(void){uint32_t time=0;
   Profile_Init(); // PB5,PB4,PF3,PF2,PF1 
   SSD1306_ClearBuffer();
   SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
+
   SSD1306_OutBuffer();
   EnableInterrupts();
-  Delay100ms(20);
+  Delay100ms(2);
   SSD1306_ClearBuffer();
+
+	SSD1306_DrawBMP(2, 0, UpArrow, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(2, 39, CarN, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(20, 39, CarNE, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(40, 39, CarE, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(60, 39, CarSE, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(80, 39, CarS, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(100, 39, CarSW, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(2, 60, CarW, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(20, 60, CarNW, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(40, 60, AmbulanceE, 0, SSD1306_WHITE);
+
+/*  
   SSD1306_DrawBMP(47, 63, PlayerShip0, 0, SSD1306_WHITE); // player ship bottom
   SSD1306_DrawBMP(53, 55, Bunker0, 0, SSD1306_WHITE);
-
-  SSD1306_DrawBMP(0, 9, Alien10pointA, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(0, 9, Alien10pointA, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(20,9, Alien10pointB, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(40, 9, Alien20pointA, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(60, 9, Alien20pointB, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(80, 9, Alien30pointA, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(50, 19, AlienBossA, 0, SSD1306_WHITE);
+*/
   SSD1306_OutBuffer();
-  Delay100ms(30);
+
+  Delay100ms(300);
 
   SSD1306_OutClear();  
   SSD1306_SetCursor(1, 1);
