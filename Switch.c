@@ -22,8 +22,8 @@ void PortE_Init(void){
 		NOP
 	}
 	
-	GPIO_PORTE_DIR_R &= ~(0x03); //PE0-1 = inputs
-	GPIO_PORTE_DEN_R |= 0x03;
+	GPIO_PORTE_DIR_R &= ~(0x07); //PE0-2 = inputs
+	GPIO_PORTE_DEN_R |= 0x07;
 	
 	GPIO_PORTE_PDR_R |= 0x03; // pull down for PE0-1
 
