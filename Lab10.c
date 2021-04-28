@@ -106,37 +106,18 @@ void CarInit(void){ int i;
 sprite_t ParkingSpot[3];
 
 
-struct State{
-	const unsigned char *out; // output for Sprite
-//	uint32_t out; // output for Sprite
-//	uint32_t outSP; // output for slide pot 
-	uint32_t next[8]; 
-};
+void CarMove(void){
+	
+	
+	
+	
+	
+}
 
-typedef const struct State State_t; 
-
-#define N 0 
-#define NE 1 
-#define E 2 
-#define SE 3 
-#define S 4 
-#define SW 5 
-#define W 6 
-#define NW 7 
-
-State_t FSM[8] = {
-// out   000 001 010 011 100 101 110 111 
-	{CarN, {N, NW, NE, N, N, NE, NW, N}},
-	{CarNE, {NE, N, E, NE, NE, E, N, NE}},
-	{CarE, {E, NE, SE, E, E, SE, NE, E}},
-	{CarSE, {SE, E, S, SE, SE, S, E, SE}},
-	{CarS, {S, SE, SW, S, S, SW, SE, S}},
-	{CarSW, {SW, S, W, SW, SW, W, S, SW}},
-	{CarW, {W, SW, NW, W, W, NW, SW, W}},
-	{CarNW, {NW, W, N, NW, NW, N, W, NW}}
-};
+void CarDraw(void){
 	
 
+}
 
 
 
