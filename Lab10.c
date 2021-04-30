@@ -56,6 +56,9 @@
 #include "Timer1.h"
 #include "TExaS.h"
 #include "Switch.h"
+#include "SysTick.h"
+
+
 //********************************************************************************
 // debuging profile, pick up to 7 unused bits and send to Logic Analyzer
 #define PB54                  (*((volatile uint32_t *)0x400050C0)) // bits 5-4
@@ -86,42 +89,112 @@ void Profile_Init(void){
 }
 //********************************************************************************
 
+const unsigned char *CarDirection[8] = {CarN, CarNE, CarE, CarSE, CarS, CarSW, CarW, CarNW};
+
 struct sprite{
 	int32_t x; 
 	int32_t y; 
-	const uint8_t *image;
+	const unsigned char *image;
 	int32_t vx, vy; 
 };
 typedef struct sprite sprite_t; 
 
 sprite_t Car[1]; 
 
-void CarInit(void){ int i; 
+void CarInit(void){ int i = 0; 
 		Car[i].x = 0; 
-	  Car[i].y = 64; 
+	  Car[i].y = 39; 
+		Car[i].image = CarDirection[2]; 
 	  Car[i].vx = 0;
 	  Car[i].vy = 0;
+//	  SSD1306_DrawBMP(Car[0].x, Car[0].y, Car[0].image, 0, SSD1306_WHITE); 
 }
-
 sprite_t ParkingSpot[3];
 
+sprite_t Person; 
+
+void PersonInit(void){  // 12 x 14  
+	Person.x = 90;
+	Person.y = 14; 
+	Person.image = person; 
+	Person.vx = 0; 
+	Person.vy = 0;
+}
+
+uint32_t Convert(uint32_t input){
+// from lab 8
+   return (156*input)/4096+27;
+}
 
 void CarMove(void){
+	NeedToDraw = 1; 
 	
-	
-	
-	
-	
+	if((Position > 0) && (Position <= 60)){  // fast neg velocity 
+		Car[0].vx = -2; 
+		Car[0].vy = -2; 
+	}
+	else if((Position > 60) && (Position <= 90)){ // slower neg velocity 
+		Car[0].vx = -1; 
+		Car[0].vy = -1;		
+	}
+	else if((Position > 90) && (Position <= 110)){  // stop 
+		Car[0].vx = 0; 
+		Car[0].vy = 0;		
+	}	
+	else if((Position > 110) && (Position <= 145)){ // slower pos velocity 
+		Car[0].vx = 1; 
+		Car[0].vy = 1;		
+	}		
+	else if((Position > 145) && (Position <= 190)){ // faster pos velocity 
+		Car[0].vx = 3; 
+		Car[0].vy = 3;		
+	}	
+
+	if(CarFlag == 0){  // N
+		Car[0].y -= Car[0].vy; 
+	}
+	else if(CarFlag == 1){  // NE
+		Car[0].x += Car[0].vx; 
+		Car[0].y += Car[0].vy; 
+	}	
+	else if(CarFlag == 2){ // E
+		Car[0].x += Car[0].vx; 
+	}		
+	else if(CarFlag == 3){ // SE
+		Car[0].x += Car[0].vx; 
+		Car[0].y -= Car[0].vy; 
+	}		
+	else if(CarFlag == 4){  // S
+		Car[0].y += Car[0].vy; 
+	}	
+	else if(CarFlag == 5){ // SW
+		Car[0].x -= Car[0].vx; 
+		Car[0].y -= Car[0].vy; 
+	}	
+	else if(CarFlag == 6){  // W
+		Car[0].x -= Car[0].vx; 
+	}	
+	else if(CarFlag == 7){ // NW
+		Car[0].x -= Car[0].vx; 
+		Car[0].y += Car[0].vy; 
+	}	
 }
 
 void CarDraw(void){
-	
-
+	SSD1306_ClearBuffer();
+	Car[0].image = CarDirection[CarFlag]; 
+	SSD1306_DrawBMP(Car[0].x, Car[0].y, Car[0].image, 0, SSD1306_WHITE); 
+	SSD1306_OutBuffer(); 
+	NeedToDraw = 0; 
 }
+
+
 
 
 
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
+uint32_t Position; 
+uint32_t Data;
 
 int main(void){uint32_t time=0;
   DisableInterrupts();
@@ -133,6 +206,10 @@ int main(void){uint32_t time=0;
   SSD1306_OutClear();   
   Random_Init(1);
   Profile_Init(); // PB5,PB4,PF3,PF2,PF1 
+	SysTick_Init(4000000); 
+	ADC_Init();
+	Switch_Init();
+	
   SSD1306_ClearBuffer();
   SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
 
@@ -141,16 +218,23 @@ int main(void){uint32_t time=0;
   Delay100ms(2);
   SSD1306_ClearBuffer();
 
-	SSD1306_DrawBMP(2, 0, UpArrow, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(2, 39, CarN, 0, SSD1306_WHITE);
+	//SSD1306_DrawBMP(2, 0, UpArrow, 0, SSD1306_WHITE);
+/*	SSD1306_DrawBMP(2, 39, CarN, 0, SSD1306_WHITE);
 	SSD1306_DrawBMP(20, 39, CarNE, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(40, 39, CarE, 0, SSD1306_WHITE);
+
 	SSD1306_DrawBMP(60, 39, CarSE, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(80, 39, CarS, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(100, 39, CarSW, 0, SSD1306_WHITE);
+
 	SSD1306_DrawBMP(2, 60, CarW, 0, SSD1306_WHITE);
 	SSD1306_DrawBMP(20, 60, CarNW, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(40, 60, AmbulanceE, 0, SSD1306_WHITE);
+	SSD1306_DrawBMP(80, 60, p, 0, SSD1306_WHITE);
+*/
+//	SSD1306_DrawBMP(60, 30, AmbulanceE, 0, SSD1306_WHITE);
+//	SSD1306_DrawBMP(80, 20, ParkingLotSide, 0, SSD1306_WHITE);
+
+//	SSD1306_DrawBMP(90, 14, person, 0, SSD1306_WHITE);
+//	SSD1306_DrawBMP(95, 39, CarS, 0, SSD1306_WHITE);
+//	SSD1306_DrawBMP(100, 39, CarSW, 0, SSD1306_WHITE);
+//	SSD1306_DrawBMP(60, 60, AmbulanceE_F, 0, SSD1306_WHITE);
 
 /*  
   SSD1306_DrawBMP(47, 63, PlayerShip0, 0, SSD1306_WHITE); // player ship bottom
@@ -161,10 +245,28 @@ int main(void){uint32_t time=0;
   SSD1306_DrawBMP(60, 9, Alien20pointB, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(80, 9, Alien30pointA, 0, SSD1306_WHITE);
   SSD1306_DrawBMP(50, 19, AlienBossA, 0, SSD1306_WHITE);
-*/
+  SSD1306_DrawBMP(0, 39, CarE, 0, SSD1306_WHITE);
   SSD1306_OutBuffer();
-
   Delay100ms(300);
+*/
+	CarInit();
+//	SSD1306_OutBuffer();
+//  Delay100ms(300);
+	
+
+	while(1){
+		Data = ADC_In(); 
+		Position = Convert(Data);
+		if(NeedToDraw == 1){
+			CarDraw(); 
+		}
+	}
+	
+  Delay100ms(300);
+//	SSD1306_OutBuffer();
+	
+
+
 
   SSD1306_OutClear();  
   SSD1306_SetCursor(1, 1);
