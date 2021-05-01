@@ -99,32 +99,73 @@ struct sprite{
 typedef struct sprite sprite_t; 
 
 
+sprite_t PSpotSide;    // 18 x 13
+
+void PSpotSide_Draw(void){
+	PSpotSide.x = 110; 
+	PSpotSide.y = 15; 
+	PSpotSide.image = ParkingSpotSide; 
+	PSpotSide.vx = 0;
+	PSpotSide.vy = 0; 
+	SSD1306_ClearBuffer();
+	SSD1306_DrawBMP(PSpotSide.x, PSpotSide.y, PSpotSide.image, 0, SSD1306_WHITE); 
+	SSD1306_OutBuffer(); 
+}
+
+//------------------------------------------
 sprite_t PLotSide;    // 18 x 64
 
+uint8_t PLot_NTD = 0; 
+
 void PLotSide_Draw(void){
+//	PLot_NTD = 1; 
 	PLotSide.x = 110; 
 	PLotSide.y = 63; 
 	PLotSide.image = ParkingLotSide; 
 	PLotSide.vx = 0;
 	PLotSide.vy = 0; 
-	SSD1306_ClearBuffer();
+//	SSD1306_ClearBuffer();
 	SSD1306_DrawBMP(PLotSide.x, PLotSide.y, PLotSide.image, 0, SSD1306_WHITE); 
-	SSD1306_OutBuffer(); 
+//	SSD1306_OutBuffer(); 
+}
+
+//------------------------------------------
+
+sprite_t plottop;    // 18 x 31
+
+void plot1top_Draw(void){ 
+	plottop.x = 110; 
+	plottop.y = 31; 
+	plottop.image = plot1top; 
+	plottop.vx = 0;
+	plottop.vy = 0; 
+	SSD1306_DrawBMP(plottop.x, plottop.y, plottop.image, 0, SSD1306_INVERSE); 
+}
+
+//------------------------------------------
+
+sprite_t plotbottom;    // 18 x 19
+
+void plot1bottom_Draw(void){
+	plotbottom.x = 110; 
+	plotbottom.y = 64; 
+	plotbottom.image = plot1bottom; 
+	plotbottom.vx = 0;
+	plotbottom.vy = 0; 
+	SSD1306_DrawBMP(plotbottom.x, plotbottom.y, plotbottom.image, 0, SSD1306_INVERSE); 
 }
 
 //------------------------------------------
 
 sprite_t P_symbol;      // 8 x 6
 
-void p_symbol1_Draw(void){ 
+void p_symbol1_Draw(void){	
 	P_symbol.x = 115; 
-	P_symbol.y = 35;
+	P_symbol.y = 41;
 	P_symbol.image = p_East; 
 	P_symbol.vx = 0;
 	P_symbol.vy = 0; 
-	SSD1306_ClearBuffer();
 	SSD1306_DrawBMP(P_symbol.x, P_symbol.y, P_symbol.image, 0, SSD1306_INVERSE); 
-	SSD1306_OutBuffer(); 
 }
 
 // center: (115+8)/2, (35+6)/2  = (61.5, 20.5)
@@ -164,8 +205,6 @@ void PersonDraw(void){
 	SSD1306_ClearBuffer();
 	Person.image = person;
 	SSD1306_DrawBMP(Person.x, Person.y, Person.image, 0, SSD1306_WHITE); 
-	SSD1306_OutBuffer(); 	
-	NeedToDraw1 = 0;
 }
 //------------------------------------------
 sprite_t Ambulance;       // 20 x 15
@@ -205,7 +244,7 @@ int i = 0;
 	
 void CarInit(void){  
 		Car[i].x = 0; 
-	  Car[i].y = 39; 
+	  Car[i].y = 42; 
 		Car[i].image = CarDirection[2]; 
 	  Car[i].vx = 0;
 	  Car[i].vy = 0;
@@ -217,21 +256,21 @@ void CarMove(void){
 		Car[0].vx = -2; 
 		Car[0].vy = -2; 
 	}
-	else if((Position > 60) && (Position <= 90)){ // slower neg velocity 
+	else if((Position > 60) && (Position <= 70)){ // slower neg velocity 
 		Car[0].vx = -1; 
 		Car[0].vy = -1;		
 	}
-	else if((Position > 90) && (Position <= 110)){  // stop 
+	else if((Position > 70) && (Position <= 130)){  // stop 
 		Car[0].vx = 0; 
 		Car[0].vy = 0;		
 	}	
-	else if((Position > 110) && (Position <= 145)){ // slower pos velocity 
+	else if((Position > 130) && (Position <= 145)){ // slower pos velocity 
 		Car[0].vx = 1; 
 		Car[0].vy = 1;		
 	}		
 	else if((Position > 145) && (Position <= 190)){ // faster pos velocity 
-		Car[0].vx = 3; 
-		Car[0].vy = 3;		
+		Car[0].vx = 2; 
+		Car[0].vy = 2;		
 	}	
 
 	if(CarFlag == 0){  // N
@@ -268,8 +307,6 @@ void CarDraw(void){
 	SSD1306_ClearBuffer();
 	Car[0].image = CarDirection[CarFlag]; 
 	SSD1306_DrawBMP(Car[0].x, Car[0].y, Car[0].image, 0, SSD1306_WHITE); 
-	SSD1306_OutBuffer(); 
-	NeedToDraw = 0; 
 }
 
 
@@ -319,20 +356,35 @@ int main(void){uint32_t time=0;
 	uint32_t P_cy = (P_symbol.y + 6)/2; 	
 
 	while(1){
-		PLotSide_Draw(); 
+		plot1top_Draw();
+	  plot1bottom_Draw();
 		p_symbol1_Draw();
 		
 		PersonMove();
+		
 		if(NeedToDraw1 == 1){
 		PersonDraw();
+		NeedToDraw1 = 0; 		
+
+		plot1top_Draw();
+	  plot1bottom_Draw();
+		p_symbol1_Draw();
 		}
 		
 		Data = ADC_In(); 
 		Position = Convert(Data);
 		if(NeedToDraw == 1){
 			CarDraw(); 
+		NeedToDraw = 0; 
+
+		plot1top_Draw();
+	  plot1bottom_Draw();
+		p_symbol1_Draw();
 		}
 		
+		SSD1306_OutBuffer();
+		
+/*		
 		uint32_t Car_cx = (Car[i].x + 14)/2; 
 		uint32_t Car_cy = (Car[i].y + 10)/2;		
 		
@@ -347,15 +399,12 @@ int main(void){uint32_t time=0;
 		if(((P_cx >> 2)==(Car_cx >> 2)) && ((P_cy >> 2)==(Car_cy >> 2))){
 			ParkSuccess = 1; 
 		}
-			
+*/			
 	}
 
 
 //	SSD1306_OutBuffer();
 	
-
-
-
   SSD1306_OutClear();  
   SSD1306_SetCursor(1, 1);
   SSD1306_OutString("GAME OVER");
