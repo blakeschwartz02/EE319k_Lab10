@@ -24,7 +24,7 @@ void SysTick_Init(uint32_t period){
 	NVIC_ST_CTRL_R = 7; // ENABLE, INTEN, CLK SRC	
 }
 
-
+uint8_t NeedToDraw1 = 0; 
 
 void SysTick_Handler(void){
 	CarMove();
