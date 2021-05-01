@@ -81,8 +81,8 @@ void GPIOPortE_Handler(void){
 
 	GPIO_PORTE_ICR_R = 0x03; // ack PE1-0
 	
-	if(Position <= 0.90){
-		Input = 0x0000000; // bit 2 is 0 for neg 
+	if(Position <= 90){
+		Input = 0x00000000; // bit 2 is 0 for neg 
 	}
 	else{ 
 		Input = 0x00000004; // bit 2 is 1 for pos 
@@ -90,38 +90,7 @@ void GPIOPortE_Handler(void){
 
 	CarFlag = FSM[St].outF;
 	NeedToDraw = 1; 
-	Input += (GPIO_PORTE_DATA_R & 0x00000003); // 2 buttons + slide pot   **changed to pos logic + added in slide pot 
-//	Input = GPIO_PORTE_DATA_R | 0xFFFFFFF8; // 2 buttons + slide pot
+	Input += (GPIO_PORTE_DATA_R & 0x00000003); // 2 buttons + slide pot
 	St = FSM[St].next[Input]; 
 
 }
-
-
-
-
-
-/*
-void PortE_Init(void){
-	SYSCTL_RCGCGPIO_R |= 0x10; // Port E
-	
-	__asm__ {
-		NOP
-		NOP
-	}
-	
-	GPIO_PORTE_DIR_R &= ~(0x07); //PE0-2 = inputs
-	GPIO_PORTE_DEN_R |= 0x07;
-	
-	GPIO_PORTE_PDR_R |= 0x03; // pull down for PE0-1
-
-}
-
-uint32_t PortE_In(void){ 
-  // write this
-	uint8_t SwitIn = GPIO_PORTE_DATA_R;
-	SwitIn &= 0x03; // mask off bits used
-	return SwitIn;
-}
-
-*/
-
