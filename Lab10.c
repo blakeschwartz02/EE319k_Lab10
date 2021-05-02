@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include "../inc/tm4c123gh6pm.h"
 #include "../inc/CortexM.h"
+#include <stdlib.h>
 #include "SSD1306.h"
 #include "Print.h"
 #include "Random.h"
@@ -87,6 +88,18 @@ void Profile_Init(void){
   GPIO_PORTF_DEN_R |=  0x0E;   // enable digital I/O on PF3,2,1
   GPIO_PORTB_DIR_R |=  0x30;   // output on PB4 PB5
   GPIO_PORTB_DEN_R |=  0x30;   // enable on PB4 PB5  
+}
+
+// You can't use this timer, it is here for starter code only 
+// you must use interrupts to perform delays
+void Delay100ms(uint32_t count){uint32_t volatile time;
+  while(count>0){
+    time = 727240;  // 0.1sec at 80 MHz
+    while(time){
+	  	time--;
+    }
+    count--;
+  }
 }
 //********************************************************************************
 
@@ -157,14 +170,25 @@ void plot1bottom_Draw(void){
 
 //------------------------------------------
 
-sprite_t P_symbol;      // 8 x 6
+sprite_t P_symbol;
+
+	// 8 x 6
+void p_symbolInit(void){
+	P_symbol.x = 115; 
+	P_symbol.y = 41;
+	P_symbol.image = p_East; 
+	P_symbol.vx = 0;
+	P_symbol.vy = 0; 	
+}
 
 void p_symbol1_Draw(void){	
+/*
 	P_symbol.x = 115; 
 	P_symbol.y = 41;
 	P_symbol.image = p_East; 
 	P_symbol.vx = 0;
 	P_symbol.vy = 0; 
+*/
 	SSD1306_DrawBMP(P_symbol.x, P_symbol.y, P_symbol.image, 0, SSD1306_INVERSE); 
 }
 
@@ -207,6 +231,44 @@ void PersonDraw(void){
 	SSD1306_DrawBMP(Person.x, Person.y, Person.image, 0, SSD1306_WHITE); 
 }
 //------------------------------------------
+
+//------------------------------------------
+
+sprite_t Tire;     // 12 x 11 
+
+void TireInit(void){   
+	Tire.x = 33;
+	Tire.y = 11; 
+	Tire.image = tire; 
+	Tire.vx = 0; 
+	Tire.vy = 0;
+}
+
+uint8_t TireDirFlag = 1; 
+
+void TireMove(void){
+	Tire_NTD = 1; 
+	if(TireDirFlag == 1){
+		if(Tire.y == 61){   // 1 step before bottom
+			TireDirFlag = 0; 
+		}
+		Tire.y += 2;
+	}
+	else if(TireDirFlag == 0){
+		if(Tire.y == 15){  // 1 step before top 
+			TireDirFlag = 1; 
+		}
+		Tire.y -= 2; 
+	}
+}
+
+void TireDraw(void){
+	SSD1306_ClearBuffer();
+	Tire.image = tire;
+	SSD1306_DrawBMP(Tire.x, Tire.y, Tire.image, 0, SSD1306_WHITE); 
+}
+//------------------------------------------
+
 sprite_t Ambulance;       // 20 x 15
 
 void AmbulanceInit(void){ 
@@ -220,7 +282,7 @@ void AmbulanceInit(void){
 uint8_t CrashFlag = 0; 
 
 void AmbulanceMove(void){
-	CrashFlag = 1; 
+//	CrashFlag = 0; 
 	Ambulance.x += Ambulance.vx; 
 }
 
@@ -228,7 +290,6 @@ void AmbulanceDraw(void){
 	SSD1306_ClearBuffer();
 	SSD1306_DrawBMP(Ambulance.x, Ambulance.y, Ambulance.image, 0, SSD1306_WHITE); 
 	SSD1306_OutBuffer(); 	
-	CrashFlag = 0; 
 }
 //------------------------------------------
 uint32_t Convert(uint32_t input){
@@ -244,8 +305,9 @@ int i = 0;
 
 	
 void CarInit(void){  
-		Car[i].x = 0; 
+		Car[i].x = 1; 
 	  Car[i].y = 42; 
+	  CarFlag = 2;
 		Car[i].image = CarDirection[CarFlag]; 
 	  Car[i].vx = 0;
 	  Car[i].vy = 0;
@@ -320,21 +382,26 @@ void ParkingLot(void){
 		p_symbol1_Draw();
 }
 
+double time= 1000;
+
 void ParkSuccess(void){
 	// success sound interrupt 
+	playSound(Engine); 
+  SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
-  SSD1306_SetCursor(20, 30);
-  SSD1306_OutString("LEVEL 1 COMPLETE");	
-  SSD1306_SetCursor(20, 31);
-  SSD1306_OutString("Score: ");		
-
+  SSD1306_SetCursor(3, 2);
+  SSD1306_OutString("LEVEL 1 COMPLETE\n");	
+  SSD1306_SetCursor(4, 4);
+  SSD1306_OutString("Score:");	
+	SSD1306_OutUDec(time); 
+  Delay100ms(10);	
 }
 
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 uint32_t Position; 
 uint32_t Data;
 
-int main(void){uint32_t time=0;
+int main(void){
   DisableInterrupts();
   // pick one of the following three lines, all three set to 80 MHz
   //PLL_Init();                   // 1) call to have no TExaS debugging
@@ -348,13 +415,14 @@ int main(void){uint32_t time=0;
 	ADC_Init();
 	Switch_Init();
 //	Timer2A_Init(&explosion, 7272, 1); 
-	
+/*	
   SSD1306_ClearBuffer();
   SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
 
   SSD1306_OutBuffer();
   EnableInterrupts();
   Delay100ms(2);
+*/
   SSD1306_ClearBuffer();
 
 /*
@@ -366,14 +434,31 @@ int main(void){uint32_t time=0;
  
 	CarInit();
 	PersonInit();
-	AmbulanceInit(); 
-	
-	uint32_t P_cx = (P_symbol.x + 8)/2; 
-	uint32_t P_cy = (P_symbol.y + 6)/2; 	
-	
-//	CarFlag = 2; 
 
-	while(1){
+	
+	p_symbolInit();
+	
+	int32_t P_cx = P_symbol.x + 8/2; 
+	int32_t P_cy = P_symbol.y - 6/2; 	
+
+	uint8_t success = 0; 
+	
+	while(success == 0){
+		
+ //   Delay100ms(10);
+ //   SSD1306_SetCursor(0,0);
+ //   SSD1306_OutUDec(time);
+    time-= 0.01;
+    PF1 ^= 0x02;
+		
+		if(CrashFlag == 1){
+			time = 1000;
+			CarInit();
+
+			CarDraw();
+			CrashFlag = 0; 
+		}
+		
 		ParkingLot();
 		
 		PersonMove();
@@ -392,21 +477,73 @@ int main(void){uint32_t time=0;
 			ParkingLot();
 		}
 		
-		SSD1306_OutBuffer();
 		
-		uint32_t Car_cx = (Car[i].x + 14)/2; 
-		uint32_t Car_cy = (Car[i].y + 10)/2;		
+		SSD1306_OutBuffer();
 
-		if(((P_cx >> 5)==(Car_cx >> 5)) && ((P_cy >> 4)==(Car_cy >> 4))){
-//		if((abs(P_cx - Car_cx))
-			if(CarStop == 1){
+		uint8_t CarXinit = Car[0].x + 14; 
+	uint8_t PerXinit = Person.x + 12;
+	uint8_t CarYinit = Car[0].y - 10;
+	uint8_t PerYinit = Person.y - 14;	
+	uint8_t Xcheck = abs(Car[0].x - Person.x); 
+	uint8_t Ycheck = abs(Car[0].y - Person.y); 
+		
+	if((Xcheck <= 12) && (Ycheck <= 14)){
+		for(uint8_t CarX = Car[0].x; CarX <= CarXinit; CarX++){
+			for(uint8_t PerX = Person.x; PerX <= PerXinit; PerX++){
+				if(CarX == PerX){
+					for(uint8_t CarY = Car[0].y; CarY >= CarYinit; CarY--){
+						for(uint8_t PerY = Person.y; PerY >= PerYinit; PerY--){
+							if(CarY == PerY){
+								CrashFlag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+		PersonMove();
+		
+		if(NeedToDraw1 == 1){
+			PersonDraw();
+			NeedToDraw1 = 0; 		
+			ParkingLot();
+		}
+		
+		Data = ADC_In(); 
+		Position = Convert(Data);
+		if(NeedToDraw == 1){
+			CarDraw(); 
+			NeedToDraw = 0; 
+			ParkingLot();
+		}
+
+		
+		SSD1306_OutBuffer();
+
+		
+		if(((Car[0].x + 14) >= 127) || (Car[0].x <= 0) || ((Car[0].y - 9) <= 0) || (Car[0].y >= 64)){ // hits wall 
+			CrashFlag = 1; 
+		}	
+		
+		int32_t Car_cx = Car[0].x + 14/2; 
+		int32_t Car_cy = Car[0].y - 10/2;		
+		
+		int32_t cx = P_cx - Car_cx;
+		int32_t cy = P_cy - Car_cy;
+
+//		if(((P_cx >> 6)==(Car_cx >> 6)) && ((P_cy >> 5)==(Car_cy >> 5))){
+//		if((abs(P_cx - Car_cx) <= 10) && (abs(P_cy - Car_cy) <= 10)){
+		if((abs(cx) <= 2) && (abs(cy) <= 2) && (CarStop == 1)){
+				success = 1; 
 				ParkSuccess();
-			}
-			else if( (Car[0].x + 14) == 64){ // hits wall 
-				CrashFlag = 1; 
-			}
-		}			
+			CrashFlag = 0; 
+		}
+	
 		if(CrashFlag == 1){
+			SSD1306_OutClear();
+	    AmbulanceInit(); 
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
@@ -415,6 +552,15 @@ int main(void){uint32_t time=0;
 		}
 				
 	}
+	
+	
+	
+	
+	while(1){
+  SSD1306_OutClear();  
+  SSD1306_SetCursor(1, 1);
+  SSD1306_OutString("GAME OVER");
+	}		
 }
 
 
@@ -449,14 +595,13 @@ int main(void){uint32_t time=0;
 
 }
 */
-// You can't use this timer, it is here for starter code only 
-// you must use interrupts to perform delays
-void Delay100ms(uint32_t count){uint32_t volatile time;
-  while(count>0){
-    time = 727240;  // 0.1sec at 80 MHz
-    while(time){
-	  	time--;
-    }
-    count--;
-  }
-}
+
+/*
+		PersonMove();
+		
+		if(NeedToDraw1 == 1){
+			PersonDraw();
+			NeedToDraw1 = 0; 		
+			ParkingLot();
+		}
+*/
