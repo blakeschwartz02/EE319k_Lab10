@@ -101,6 +101,9 @@ void Delay100ms(uint32_t count){uint32_t volatile time;
     count--;
   }
 }
+
+void wait(void){}
+
 //********************************************************************************
 
 struct sprite{
@@ -275,7 +278,7 @@ void AmbulanceInit(void){
 	Ambulance.x = 0; 
 	Ambulance.y = 37; 
 	Ambulance.image = AmbulanceSide; 
-	Ambulance.vx = 1; 
+	Ambulance.vx = 2; 
 	Ambulance.vy = 0; 	
 }
 
@@ -291,6 +294,24 @@ void AmbulanceDraw(void){
 	SSD1306_DrawBMP(Ambulance.x, Ambulance.y, Ambulance.image, 0, SSD1306_WHITE); 
 	SSD1306_OutBuffer(); 	
 }
+//------------------------------------------
+
+sprite_t boom; 
+
+void BoomInit(void){ // 126 x 63 
+	boom.x = 0;
+	boom.y = 63;
+	boom.image = Boom2; 
+	boom.vx = 0;
+	boom.vy = 0; 
+}
+
+void BoomDraw(void){
+	SSD1306_ClearBuffer();
+	SSD1306_DrawBMP(boom.x, boom.y, boom.image, 0, SSD1306_WHITE); 
+}
+
+
 //------------------------------------------
 uint32_t Convert(uint32_t input){
 // from lab 8
@@ -386,7 +407,7 @@ double time= 1000;
 
 void ParkSuccess(void){
 	// success sound interrupt 
-	playSound(Engine); 
+	playSound(BoomSound); 
   SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
   SSD1306_SetCursor(3, 2);
@@ -414,7 +435,8 @@ int main(void){
 	SysTick_Init(4000000); 
 	ADC_Init();
 	Switch_Init();
-//	Timer2A_Init(&explosion, 7272, 1); 
+//	Sound_Init(); 
+//	playSound(BoomSound); 
 /*	
   SSD1306_ClearBuffer();
   SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
@@ -454,7 +476,6 @@ int main(void){
 		if(CrashFlag == 1){
 			time = 1000;
 			CarInit();
-
 			CarDraw();
 			CrashFlag = 0; 
 		}
@@ -542,24 +563,36 @@ int main(void){
 		}
 	
 		if(CrashFlag == 1){
+//			playSound(BoomSound);
+//			Clock_Delay1ms(1000); 
 			SSD1306_OutClear();
+//			BoomInit();
+ //			Timer0_Init(&wait, 80000000); 
+
+//			BoomDraw();
+//			SSD1306_OutBuffer(); 	
 	    AmbulanceInit(); 
+			playSound(Alarm);
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
 				// siren sound interrupt 
 			}
+		  SSD1306_ClearBuffer();
+			SSD1306_OutClear(); 
+			SSD1306_SetCursor(3, 2);
+			SSD1306_OutString("LEVEL FAILED\n");
+			Delay100ms(10);	
 		}
 				
 	}
 	
 	
 	
-	
-	while(1){
-  SSD1306_OutClear();  
-  SSD1306_SetCursor(1, 1);
-  SSD1306_OutString("GAME OVER");
+	SSD1306_OutClear(); 
+	while(1){ 
+		SSD1306_SetCursor(1, 1);
+		SSD1306_OutString("GAME OVER");
 	}		
 }
 
