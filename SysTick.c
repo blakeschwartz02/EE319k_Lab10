@@ -25,6 +25,7 @@ void SysTick_Init(uint32_t period){
 }
 
 uint8_t NeedToDraw1 = 0; 
+uint8_t Tire_NTD = 0; 
 
 void SysTick_Handler(void){
 	CarMove();
