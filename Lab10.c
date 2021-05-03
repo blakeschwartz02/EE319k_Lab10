@@ -102,7 +102,12 @@ void Delay100ms(uint32_t count){uint32_t volatile time;
   }
 }
 
-void wait(void){}
+void wait(void){
+	long long count = 10000000000000;
+	while(count != 0 ){
+		count--;
+	}
+}
 
 //********************************************************************************
 
@@ -461,6 +466,12 @@ int main(void){
   Delay100ms(2);
 */
   SSD1306_ClearBuffer();
+	SSD1306_DrawBMP(2, 62, Title, 0, SSD1306_WHITE);
+	SSD1306_OutBuffer();
+	Timer0_Init(&wait, 800000000);
+	SSD1306_ClearBuffer();
+	SSD1306_OutClear();
+	
 	ChooseLang();
 /*
 
