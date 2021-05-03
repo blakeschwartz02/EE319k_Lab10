@@ -20,6 +20,7 @@
 
 volatile uint8_t right, left; // semaphores 
 void Switch_Init(void){
+	//PortE
 	SYSCTL_RCGCGPIO_R |= 0x00000010; // activate Port E clock
 	right = 0; left = 0; // clear semaphores 
 	while((SYSCTL_PRGPIO_R & 0x00000010) == 0){};
@@ -35,7 +36,26 @@ void Switch_Init(void){
 	GPIO_PORTE_ICR_R = 0x03; // clear flag1-0
 	GPIO_PORTE_IM_R |= 0x03; // arm interrupt 
 	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000040; // priority 2
-	NVIC_EN0_R = 0x00000010; // enable interrupt 4 in NVIC (Port E) 
+	NVIC_EN0_R = 0x40000000; // enable interrupt 4 in NVIC (Port E) 
+		
+	//PortF
+	SYSCTL_RCGCGPIO_R |= 0x00000020; // activate Port E clock
+	while((SYSCTL_PRGPIO_R & 0x00000020) == 0){};
+	GPIO_PORTF_LOCK_R = 0x4C4F434B;
+	GPIO_PORTF_CR_R = 0x1F;
+	GPIO_PORTF_AMSEL_R &= ~0x11; // disable analog function 
+	GPIO_PORTF_PCTL_R &= ~0x000000FF; // ******* configure as GPIO
+	GPIO_PORTF_DIR_R &= ~0x11; // make PE1-0 inputs
+	GPIO_PORTF_AFSEL_R &= ~ 0x11; 
+	GPIO_PORTF_DEN_R |= 0x11; 
+	GPIO_PORTF_PUR_R |= 0x11; // pull-up
+	GPIO_PORTF_IS_R &= ~0x11; // PF4,0 edge sensitive
+	GPIO_PORTF_IBE_R &= ~0x11; // PF4,0 not both edges 
+	GPIO_PORTF_IEV_R |= 0x11; // PF4,0 rising edge
+	GPIO_PORTF_ICR_R = 0x11; // clear flag4,0
+	GPIO_PORTF_IM_R |= 0x11; // arm interrupt 
+	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000020; // priority 1
+	NVIC_EN0_R = 0x00000000; // enable interrupt 5 in NVIC (Port F) 
 	EnableInterrupts(); 
 }
 
@@ -74,6 +94,7 @@ State_t FSM[8] = {
 int CarFlag; 
 int St = E; 
 int Input; 
+int lang;
  
 uint8_t NeedToDraw = 0; 
 
@@ -93,4 +114,16 @@ void GPIOPortE_Handler(void){
 	Input += (GPIO_PORTE_DATA_R & 0x00000003); // 2 buttons + slide pot
 	St = FSM[St].next[Input]; 
 
+}
+
+void GPIOPortF_Handler(void){
+	
+	GPIO_PORTF_ICR_R = 0x11;
+	
+	if((GPIO_PORTF_DATA_R & 0x00000011) == 0x00000001){
+		lang = 0;
+	}
+	else if((GPIO_PORTF_DATA_R & 0x00000011) == 0x00000010){
+		lang = 1;
+	}
 }
