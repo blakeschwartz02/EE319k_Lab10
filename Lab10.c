@@ -407,13 +407,20 @@ double time= 1000;
 
 void ParkSuccess(void){
 	// success sound interrupt 
-	playSound(BoomSound); 
+//	playSound(BoomSound); 
   SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
   SSD1306_SetCursor(3, 2);
-  SSD1306_OutString("LEVEL 1 COMPLETE\n");	
-  SSD1306_SetCursor(4, 4);
-  SSD1306_OutString("Score:");	
+	if(lang == 0){
+		SSD1306_OutString("LEVEL 1 COMPLETE\n");	
+		SSD1306_SetCursor(4, 4);
+		SSD1306_OutString("Score:");	
+	}
+	else{
+		SSD1306_OutString("LIVELLO 1 COMPLETO\n");	
+		SSD1306_SetCursor(4, 4);
+		SSD1306_OutString("PUNTO:");
+	}
 	SSD1306_OutUDec(time); 
   Delay100ms(10);	
 }
@@ -421,6 +428,14 @@ void ParkSuccess(void){
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 uint32_t Position; 
 uint32_t Data;
+
+void ChooseLang(void){
+	SSD1306_SetCursor(0,0);
+	SSD1306_OutString("Press SW1 for English/Premere il SW2 per l'italiano");
+	while(((GPIO_PORTF_DATA_R & 0x01) == 0x01) && ((GPIO_PORTF_DATA_R & 0x010) == 0x10)){
+	};
+	SSD1306_OutClear();
+}
 
 int main(void){
   DisableInterrupts();
@@ -446,7 +461,7 @@ int main(void){
   Delay100ms(2);
 */
   SSD1306_ClearBuffer();
-
+	ChooseLang();
 /*
 
 	SSD1306_DrawBMP(80, 60, p, 0, SSD1306_WHITE);
@@ -572,7 +587,7 @@ int main(void){
 //			BoomDraw();
 //			SSD1306_OutBuffer(); 	
 	    AmbulanceInit(); 
-			playSound(Alarm);
+//		playSound(Alarm);
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
@@ -581,7 +596,12 @@ int main(void){
 		  SSD1306_ClearBuffer();
 			SSD1306_OutClear(); 
 			SSD1306_SetCursor(3, 2);
-			SSD1306_OutString("LEVEL FAILED\n");
+			if(lang == 0){
+				SSD1306_OutString("LEVEL FAILED\n");
+			}
+			else{
+				SSD1306_OutString("LIVELLO FALLITO\n");
+			}
 			Delay100ms(10);	
 		}
 				
@@ -592,7 +612,12 @@ int main(void){
 	SSD1306_OutClear(); 
 	while(1){ 
 		SSD1306_SetCursor(1, 1);
-		SSD1306_OutString("GAME OVER");
+		if(lang == 0){
+			SSD1306_OutString("END OF GAME");
+		}
+		else{
+			SSD1306_OutString("FINE DEL GIOCO");
+		}
 	}		
 }
 
