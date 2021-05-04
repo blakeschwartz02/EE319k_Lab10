@@ -36,33 +36,12 @@ void Switch_Init(void){
 	GPIO_PORTE_ICR_R = 0x03; // clear flag1-0
 	GPIO_PORTE_IM_R |= 0x03; // arm interrupt 
 	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000040; // priority 2
-	//PortF
-		/*
-	SYSCTL_RCGCGPIO_R |= 0x00000020; // activate Port F clock
-	while((SYSCTL_PRGPIO_R & 0x00000020) == 0){};
-	GPIO_PORTF_LOCK_R = 0x4C4F434B;
-	GPIO_PORTF_CR_R = 0x1F;
-	GPIO_PORTF_AMSEL_R &= ~0x11; // disable analog function 
-	GPIO_PORTF_PCTL_R &= ~0x000000FF; // ******* configure as GPIO
-	GPIO_PORTF_DIR_R &= ~0x11; // make PF4-0 inputs
-	GPIO_PORTF_AFSEL_R &= ~ 0x11; 
-	GPIO_PORTF_DEN_R |= 0x11; 
-	GPIO_PORTF_PUR_R |= 0x11; // pull-up
-	GPIO_PORTF_IS_R &= ~0x11; // PF4,0 edge sensitive
-	GPIO_PORTF_IBE_R &= ~0x11; // PF4,0 not both edges 
-	GPIO_PORTF_IEV_R |= 0x11; // PF4,0 rising edge
-	GPIO_PORTF_ICR_R = 0x11; // clear flag4,0
-	GPIO_PORTF_IM_R |= 0x11; // arm interrupt 
-	NVIC_PRI7_R = (NVIC_PRI7_R & 0xFF00FFFF) | 0x00200000; // priority 1
-	*/
-	NVIC_EN0_R = 0x00000010; // enable interrupt 4 and 5 in NVIC (Port E, Port F) 
+	NVIC_EN0_R = 0x00000010; // enable interrupt 4 and 5 in NVIC (Port E) 
 	EnableInterrupts(); 
 }
 
 struct State{
-//	const unsigned char *out; // output for Sprite
 	uint32_t outF; // output for car flag
-//	uint32_t outSP; // output for slide pot 
 	uint32_t next[8]; 
 };
 
@@ -126,19 +105,3 @@ void GPIOPortE_Handler(void){
 	St = FSM[St].next[Input]; 
 }
 
-/*
-void GPIOPortF_Handler(void){
-	
-	GPIO_PORTF_ICR_R = 0x11;
-	
-	if((GPIO_PORTF_DATA_R & 0x00000011) == 0x01){
-		lang = 0;
-		done = 1;
-	}
-  else if((GPIO_PORTF_DATA_R & 0x00000011) == 0x10){
-		lang = 1;
-		done = 1;
-	}
-}
-
-*/
