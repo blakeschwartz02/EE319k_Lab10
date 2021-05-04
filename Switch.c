@@ -20,7 +20,6 @@
 
 volatile uint8_t right, left; // semaphores 
 void Switch_Init(void){
-	//PortE
 	SYSCTL_RCGCGPIO_R |= 0x00000010; // activate Port E clock
 	right = 0; left = 0; // clear semaphores 
 	while((SYSCTL_PRGPIO_R & 0x00000010) == 0){};
@@ -31,12 +30,12 @@ void Switch_Init(void){
 	GPIO_PORTE_DEN_R |= 0x03; 
 	GPIO_PORTE_PDR_R |= 0x03; // pull-down 
 	GPIO_PORTE_IS_R &= ~0x03; // PE1-0 edge sensitive
-	GPIO_PORTE_IBE_R &= ~0x03; // PE1-0 not both edges 
-	GPIO_PORTE_IEV_R |= 0x03; // PE1-0 rising edge
+	GPIO_PORTE_IBE_R |= 0x03; // PE1-0 both edges 
+//	GPIO_PORTE_IEV_R |= 0x03; // PE1-0 rising edge
 	GPIO_PORTE_ICR_R = 0x03; // clear flag1-0
 	GPIO_PORTE_IM_R |= 0x03; // arm interrupt 
 	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000040; // priority 2
-	NVIC_EN0_R = 0x00000010; // enable interrupt 4 and 5 in NVIC (Port E) 
+	NVIC_EN0_R = 0x00000010; // enable interrupt 4 in NVIC (Port E) 
 	EnableInterrupts(); 
 }
 
@@ -67,8 +66,6 @@ State_t FSM[8] = {
 	{6, {W, SW, NW, W, W, NW, SW, W}},
 	{7, {NW, W, N, NW, NW, N, W, NW}}
 };
-
-
 
 int CarFlag; 
 int St = E; 
