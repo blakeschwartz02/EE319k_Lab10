@@ -11,9 +11,8 @@
 // Header files contain the prototypes for public functions 
 // this file explains what the module does
 
-extern const uint8_t explosion[]; 
 
-typedef enum {Engine, Explosion, BoomSound, Alarm, Win, Accel} soundEffect; 
+typedef enum {Alarm, Win, Accel} soundEffect; 
 
 extern uint32_t pIndex;
 void playSample(void);
@@ -21,15 +20,7 @@ void playSample(void);
 void playSound(soundEffect);
 
 void Sound_Init(void);
-//******* Sound_Start ************
-// This function does not output to the DAC. 
-// Rather, it sets a pointer and counter, and then enables the timer interrupt.
-// It starts the sound, and the timer ISR does the output
-// feel free to change the parameters
-// Input: pt is a pointer to an array of DAC outputs
-//        count is the length of the array
-// Output: none
-// special cases: as you wish to implement
+
 void Sound_Play(const uint8_t *pt, uint32_t count);
 
 
