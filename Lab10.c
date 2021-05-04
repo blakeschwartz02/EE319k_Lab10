@@ -112,47 +112,17 @@ struct sprite{
 };
 typedef struct sprite sprite_t; 
 
-
-sprite_t PSpotSide;    // 18 x 13
-
-void PSpotSide_Draw(void){
-	PSpotSide.x = 110; 
-	PSpotSide.y = 15; 
-	PSpotSide.image = ParkingSpotSide; 
-	PSpotSide.vx = 0;
-	PSpotSide.vy = 0; 
-	SSD1306_ClearBuffer();
-	SSD1306_DrawBMP(PSpotSide.x, PSpotSide.y, PSpotSide.image, 0, SSD1306_WHITE); 
-	SSD1306_OutBuffer(); 
-}
-
-//------------------------------------------
-sprite_t PLotSide;    // 18 x 64
-
-uint8_t PLot_NTD = 0; 
-
-void PLotSide_Draw(void){
-//	PLot_NTD = 1; 
-	PLotSide.x = 110; 
-	PLotSide.y = 63; 
-	PLotSide.image = ParkingLotSide; 
-	PLotSide.vx = 0;
-	PLotSide.vy = 0; 
-//	SSD1306_ClearBuffer();
-	SSD1306_DrawBMP(PLotSide.x, PLotSide.y, PLotSide.image, 0, SSD1306_WHITE); 
-//	SSD1306_OutBuffer(); 
-}
-
-//------------------------------------------
-
 sprite_t plottop;    // 18 x 31
 
-void plot1top_Draw(void){ 
+void plot1top_Init(void){
 	plottop.x = 110; 
 	plottop.y = 31; 
 	plottop.image = plot1top; 
 	plottop.vx = 0;
 	plottop.vy = 0; 
+}	
+
+void plot1top_Draw(void){ 
 	SSD1306_DrawBMP(plottop.x, plottop.y, plottop.image, 0, SSD1306_INVERSE); 
 }
 
@@ -160,12 +130,14 @@ void plot1top_Draw(void){
 
 sprite_t plotbottom;    // 18 x 19
 
-void plot1bottom_Draw(void){
+void plot1bottom_Init(void){
 	plotbottom.x = 110; 
 	plotbottom.y = 64; 
 	plotbottom.image = plot1bottom; 
 	plotbottom.vx = 0;
 	plotbottom.vy = 0; 
+}
+void plot1bottom_Draw(void){
 	SSD1306_DrawBMP(plotbottom.x, plotbottom.y, plotbottom.image, 0, SSD1306_INVERSE); 
 }
 
@@ -183,13 +155,7 @@ void p_symbolInit(void){
 }
 
 void p_symbol1_Draw(void){	
-/*
-	P_symbol.x = 115; 
-	P_symbol.y = 41;
 	P_symbol.image = p_East; 
-	P_symbol.vx = 0;
-	P_symbol.vy = 0; 
-*/
 	SSD1306_DrawBMP(P_symbol.x, P_symbol.y, P_symbol.image, 0, SSD1306_INVERSE); 
 }
 
@@ -274,15 +240,15 @@ sprite_t Handicap;     //  10 x 12
 
 void handicapInit(void){   
 	Handicap.x = 1;
-	Handicap.y = 15; 
+	Handicap.y = 62; 
 	Handicap.image = handicapSmall; 
 	Handicap.vx = 0; 
 	Handicap.vy = 0;
 }
 
-uint8_t HCapDirFlag = 1; 
+//uint8_t HCapDirFlag = 1; 
 
-void handicapMove(void){
+/*void handicapMove(void){
 //	Tire_NTD = 1; 
 	if(HCapDirFlag == 1){
 		if(Handicap.x == 80){   // 1 step before bottom
@@ -297,9 +263,9 @@ void handicapMove(void){
 		Handicap.x -= 1; 
 	}
 }
-
+*/
 void handicapDraw(void){
-	SSD1306_ClearBuffer();
+//	SSD1306_ClearBuffer();
 	Handicap.image = handicapSmall; 
 	SSD1306_DrawBMP(Handicap.x, Handicap.y, Handicap.image, 0, SSD1306_WHITE); 
 }
@@ -327,23 +293,6 @@ void AmbulanceDraw(void){
 	SSD1306_DrawBMP(Ambulance.x, Ambulance.y, Ambulance.image, 0, SSD1306_WHITE); 
 	SSD1306_OutBuffer(); 	
 }
-//------------------------------------------
-
-sprite_t boom; 
-
-void BoomInit(void){ // 126 x 63 
-	boom.x = 0;
-	boom.y = 63;
-	boom.image = Boom2; 
-	boom.vx = 0;
-	boom.vy = 0; 
-}
-
-void BoomDraw(void){
-	SSD1306_ClearBuffer();
-	SSD1306_DrawBMP(boom.x, boom.y, boom.image, 0, SSD1306_WHITE); 
-}
-
 
 //------------------------------------------
 uint32_t Convert(uint32_t input){
@@ -357,7 +306,6 @@ sprite_t Car[1];
 
 int i = 0;
 
-	
 void CarInit(void){  
 		Car[i].x = 1; 
 	  Car[i].y = 42; 
@@ -430,17 +378,21 @@ void CarDraw(void){
 	SSD1306_DrawBMP(Car[0].x, Car[0].y, Car[0].image, 0, SSD1306_WHITE); 
 }
 
+uint8_t success = 0; 
+
 void ParkingLot(void){
 		plot1top_Draw();
 	  plot1bottom_Draw();
 		p_symbol1_Draw();
+	  if(success == 1){
+			handicapDraw(); 
+		}
 }
 
 double time= 1000;
 double time2 = 1000;
 
 void ParkSuccess(void){
-	// success sound interrupt 
 	playSound(Win); 
   SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
@@ -460,7 +412,6 @@ void ParkSuccess(void){
 }
 
 void ParkSuccess2(void){
-	// success sound interrupt 
 	playSound(Win); 
   SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
@@ -546,22 +497,18 @@ int main(void){
 	CarInit();
 	PersonInit();
 
-
-	
+	plot1top_Init();
+	plot1bottom_Init(); 
 	p_symbolInit();
 	
 	int32_t P_cx = P_symbol.x + 8/2; 
 	int32_t P_cy = P_symbol.y - 6/2; 	
 
-	uint8_t success = 0; 
+//	uint8_t success = 0; 
 	uint8_t success2 = 0;
 	
 	while(success == 0){
-		
- //   Delay100ms(10);
- //   SSD1306_SetCursor(0,0);
- //   SSD1306_OutUDec(time);
-    time-= 0.01;
+    time-= 0.05;
     PF1 ^= 0x02;
 		
 		if(CrashFlag == 1){
@@ -651,20 +598,12 @@ int main(void){
 		}
 	
 		if(CrashFlag == 1){
-//			playSound(BoomSound);
-//			Clock_Delay1ms(1000); 
 			SSD1306_OutClear();
-//			BoomInit();
- //			Timer0_Init(&wait, 80000000); 
-
-//			BoomDraw();
-//			SSD1306_OutBuffer(); 	
 	    AmbulanceInit(); 
-		playSound(Alarm);
+			playSound(Alarm);
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
-				// siren sound interrupt 
 			}
 		  SSD1306_ClearBuffer();
 			SSD1306_OutClear(); 
@@ -696,13 +635,10 @@ SSD1306_ClearBuffer();
 	Car[i].y -= 20;
 	PersonInit();
 	TireInit();
+	handicapInit(); 
 	
 	//Level TWO ------------------------------------------------
 	while(success2 == 0){
-		
- //   Delay100ms(10);
- //   SSD1306_SetCursor(0,0);
- //   SSD1306_OutUDec(time);
     time2-= 1;
     PF1 ^= 0x02;
 		
@@ -740,8 +676,7 @@ SSD1306_ClearBuffer();
 			CarDraw(); 
 			NeedToDraw = 0; 
 			ParkingLot();
-		}
-		
+		}	
 		
 		SSD1306_OutBuffer();
 
@@ -763,10 +698,10 @@ SSD1306_ClearBuffer();
 							}
 						}
 					}
-				}
+				}				
 			}
-		}
-	}	
+		}	
+	}		
 	
 		PersonMove();
 		if(NeedToDraw1 == 1){
@@ -781,6 +716,7 @@ SSD1306_ClearBuffer();
 	uint8_t TireYinit = Tire.y - 11;	
 	uint8_t XTirecheck = abs(Car[0].x - Tire.x); 
 	uint8_t YTirecheck = abs(Car[0].y - Tire.y); 
+	
 		
 	if((XTirecheck <= 12) && (YTirecheck <= 11)){
 		for(uint8_t CarX = Car[0].x; CarX <= CarXinit; CarX++){
@@ -797,7 +733,7 @@ SSD1306_ClearBuffer();
 			}
 		}
 	}	
-	
+
 		TireMove();
 		if(Tire_NTD == 1){
 			TireDraw();
@@ -837,20 +773,12 @@ SSD1306_ClearBuffer();
 		}
 	
 		if(CrashFlag == 1){
-//			playSound(BoomSound);
-//			Clock_Delay1ms(1000); 
 			SSD1306_OutClear();
-//			BoomInit();
- //			Timer0_Init(&wait, 80000000); 
-
-//			BoomDraw();
-//			SSD1306_OutBuffer(); 	
 	    AmbulanceInit(); 
-		playSound(Alarm);
+			playSound(Alarm);
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
-				// siren sound interrupt 
 			}
 		  SSD1306_ClearBuffer();
 			SSD1306_OutClear(); 
@@ -865,8 +793,7 @@ SSD1306_ClearBuffer();
 		}
 				
 	}
-		
-	
+
 	SSD1306_OutClear(); 
 	while(1){ 
 		SSD1306_SetCursor(2, 2);
@@ -879,46 +806,4 @@ SSD1306_ClearBuffer();
 	}		
 }
 
-
-//	SSD1306_OutBuffer();
-/*	
-  SSD1306_OutClear();  
-  SSD1306_SetCursor(1, 1);
-  SSD1306_OutString("GAME OVER");
-  SSD1306_SetCursor(1, 2);
-  SSD1306_OutString("Nice try,");
-  SSD1306_SetCursor(1, 3);
-  SSD1306_OutString("Earthling!");
-  SSD1306_SetCursor(2, 4);
-  while(1){
-    Delay100ms(10);
-    SSD1306_SetCursor(19,0);
-    SSD1306_OutUDec2(time);
-    time++;
-    PF1 ^= 0x02;
-  }
-*/	
-	
-/*  
-  SSD1306_DrawBMP(47, 63, PlayerShip0, 0, SSD1306_WHITE); // player ship bottom
-  SSD1306_DrawBMP(53, 55, Bunker0, 0, SSD1306_WHITE);
-	SSD1306_DrawBMP(0, 9, Alien10pointA, 0, SSD1306_WHITE);
-  SSD1306_DrawBMP(20,9, Alien10pointB, 0, SSD1306_WHITE);
-  SSD1306_DrawBMP(40, 9, Alien20pointA, 0, SSD1306_WHITE);
-  SSD1306_DrawBMP(60, 9, Alien20pointB, 0, SSD1306_WHITE);
-  SSD1306_DrawBMP(80, 9, Alien30pointA, 0, SSD1306_WHITE);
-  SSD1306_DrawBMP(50, 19, AlienBossA, 0, SSD1306_WHITE);
-
-}
-*/
-
-/*
-		PersonMove();
-		
-		if(NeedToDraw1 == 1){
-			PersonDraw();
-			NeedToDraw1 = 0; 		
-			ParkingLot();
-		}
-*/
 
