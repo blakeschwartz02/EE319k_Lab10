@@ -5,6 +5,7 @@
 #include "../inc/tm4c123gh6pm.h"
 #include "Switch.h"
 #include "ADC.h"
+//extern void ChooseLang(void); 
 extern void CarMove(void); 
 
 
@@ -26,10 +27,13 @@ void SysTick_Init(uint32_t period){
 
 uint8_t NeedToDraw1 = 0; 
 uint8_t Tire_NTD = 0; 
+uint8_t handicap_NTD = 0; 
+
 
 void SysTick_Handler(void){
 	CarMove();
-}
+	}
+
 
 
 
