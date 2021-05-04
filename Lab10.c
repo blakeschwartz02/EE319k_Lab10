@@ -102,13 +102,6 @@ void Delay100ms(uint32_t count){uint32_t volatile time;
   }
 }
 
-void wait(void){
-	long long count = 10000000000000;
-	while(count != 0 ){
-		count--;
-	}
-}
-
 //********************************************************************************
 
 struct sprite{
@@ -437,7 +430,9 @@ uint32_t Data;
 void ChooseLang(void){
 	SSD1306_SetCursor(0,0);
 	SSD1306_OutString("Press SW1 for English/Premere il SW2 per l'italiano");
-	while(((GPIO_PORTF_DATA_R & 0x01) == 0x01) && ((GPIO_PORTF_DATA_R & 0x010) == 0x10)){
+	//while(((GPIO_PORTF_DATA_R & 0x01) == 0x01) && ((GPIO_PORTF_DATA_R & 0x010) == 0x10)){
+	//};
+	while(done != 1){
 	};
 	SSD1306_OutClear();
 }
@@ -462,21 +457,24 @@ int main(void){
   SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
 
   SSD1306_OutBuffer();
-  EnableInterrupts();
-  Delay100ms(2);
 */
+  EnableInterrupts();
+ // Delay100ms(2);
+
+
   SSD1306_ClearBuffer();
 	SSD1306_DrawBMP(2, 62, Title, 0, SSD1306_WHITE);
 	SSD1306_OutBuffer();
-	Timer0_Init(&wait, 800000000);
+	Delay100ms(50);
 	SSD1306_ClearBuffer();
+
+
 	SSD1306_OutClear();
-	
 	ChooseLang();
-/*
+
 
 	SSD1306_DrawBMP(80, 60, p, 0, SSD1306_WHITE);
-*/
+
 //  SSD1306_OutBuffer();
  // Delay100ms(300);
  
@@ -610,7 +608,7 @@ int main(void){
 			if(lang == 0){
 				SSD1306_OutString("LEVEL FAILED\n");
 			}
-			else{
+			else if(lang == 1){
 				SSD1306_OutString("LIVELLO FALLITO\n");
 			}
 			Delay100ms(10);	
@@ -674,3 +672,4 @@ int main(void){
 			ParkingLot();
 		}
 */
+
