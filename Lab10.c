@@ -428,8 +428,16 @@ uint32_t Position;
 uint32_t Data;
 
 void ChooseLang(void){
-	SSD1306_SetCursor(0,0);
-	SSD1306_OutString("Press SW1 for English/Premere il SW2 per l'italiano");
+	SSD1306_SetCursor(1,2);
+	SSD1306_OutString("Press right button");
+	SSD1306_SetCursor(2,3);
+	SSD1306_OutString("for English");
+	SSD1306_SetCursor(1,5);
+	SSD1306_OutString("Premere il pulsante");
+	SSD1306_SetCursor(2,6);
+	SSD1306_OutString("sinistro per");
+		SSD1306_SetCursor(3,7);
+	SSD1306_OutString("l'italiano");
 	//while(((GPIO_PORTF_DATA_R & 0x01) == 0x01) && ((GPIO_PORTF_DATA_R & 0x010) == 0x10)){
 	//};
 	while(done != 1){
@@ -465,7 +473,7 @@ int main(void){
   SSD1306_ClearBuffer();
 	SSD1306_DrawBMP(2, 62, Title, 0, SSD1306_WHITE);
 	SSD1306_OutBuffer();
-	Delay100ms(50);
+	Delay100ms(10);
 	SSD1306_ClearBuffer();
 
 
@@ -596,7 +604,7 @@ int main(void){
 //			BoomDraw();
 //			SSD1306_OutBuffer(); 	
 	    AmbulanceInit(); 
-//		playSound(Alarm);
+		playSound(Alarm);
 			while(Ambulance.x != 120){
 				AmbulanceMove(); 
 				AmbulanceDraw(); 
