@@ -405,7 +405,7 @@ double time= 1000;
 
 void ParkSuccess(void){
 	// success sound interrupt 
-//	playSound(BoomSound); 
+	playSound(Win); 
   SSD1306_ClearBuffer();
   SSD1306_OutClear(); 
   SSD1306_SetCursor(3, 2);
@@ -420,7 +420,7 @@ void ParkSuccess(void){
 		SSD1306_OutString("PUNTO:");
 	}
 	SSD1306_OutUDec(time); 
-  Delay100ms(10);	
+  Delay100ms(20);	
 }
 
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
@@ -572,7 +572,6 @@ int main(void){
 			ParkingLot();
 		}
 
-		
 		SSD1306_OutBuffer();
 
 		
