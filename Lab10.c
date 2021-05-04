@@ -420,7 +420,7 @@ void ParkSuccess(void){
 		SSD1306_OutString("PUNTO:");
 	}
 	SSD1306_OutUDec(time); 
-  Delay100ms(20);	
+  Delay100ms(40);	
 }
 
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
