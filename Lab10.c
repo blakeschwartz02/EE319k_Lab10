@@ -231,7 +231,6 @@ void PersonDraw(void){
 	Person.image = person;
 	SSD1306_DrawBMP(Person.x, Person.y, Person.image, 0, SSD1306_WHITE); 
 }
-//------------------------------------------
 
 //------------------------------------------
 
@@ -239,34 +238,70 @@ sprite_t Tire;     // 12 x 11
 
 void TireInit(void){   
 	Tire.x = 33;
-	Tire.y = 11; 
+	Tire.y = 61; 
 	Tire.image = tire; 
 	Tire.vx = 0; 
 	Tire.vy = 0;
 }
 
-uint8_t TireDirFlag = 1; 
+uint8_t TireDirFlag = 0; 
 
 void TireMove(void){
 	Tire_NTD = 1; 
 	if(TireDirFlag == 1){
-		if(Tire.y == 61){   // 1 step before bottom
+		if(Tire.y == 12){   // 1 step before bottom
 			TireDirFlag = 0; 
 		}
-		Tire.y += 2;
+		Tire.y -= 1;
 	}
 	else if(TireDirFlag == 0){
-		if(Tire.y == 15){  // 1 step before top 
+		if(Tire.y == 61){  // 1 step before top 
 			TireDirFlag = 1; 
 		}
-		Tire.y -= 2; 
+		Tire.y += 1; 
 	}
 }
 
 void TireDraw(void){
-	SSD1306_ClearBuffer();
+//	SSD1306_ClearBuffer();
 	Tire.image = tire;
 	SSD1306_DrawBMP(Tire.x, Tire.y, Tire.image, 0, SSD1306_WHITE); 
+}
+
+//------------------------------------------
+
+sprite_t Handicap;     //  10 x 12
+
+void handicapInit(void){   
+	Handicap.x = 1;
+	Handicap.y = 15; 
+	Handicap.image = handicapSmall; 
+	Handicap.vx = 0; 
+	Handicap.vy = 0;
+}
+
+uint8_t HCapDirFlag = 1; 
+
+void handicapMove(void){
+//	Tire_NTD = 1; 
+	if(HCapDirFlag == 1){
+		if(Handicap.x == 80){   // 1 step before bottom
+			HCapDirFlag = 0; 
+		}
+		Handicap.x += 1;
+	}
+	else if(HCapDirFlag == 0){
+		if(Handicap.x == 1){  // 1 step before top 
+			HCapDirFlag = 1; 
+		}
+		Handicap.x -= 1; 
+	}
+}
+
+void handicapDraw(void){
+	SSD1306_ClearBuffer();
+	Handicap.image = handicapSmall; 
+	SSD1306_DrawBMP(Handicap.x, Handicap.y, Handicap.image, 0, SSD1306_WHITE); 
 }
 //------------------------------------------
 
@@ -492,9 +527,10 @@ int main(void){
 
 
   SSD1306_ClearBuffer();
+	playSound(Accel); 
 	SSD1306_DrawBMP(2, 62, Title, 0, SSD1306_WHITE);
 	SSD1306_OutBuffer();
-	Delay100ms(10);
+	Delay100ms(20);
 	SSD1306_ClearBuffer();
 
 
@@ -510,13 +546,14 @@ int main(void){
 	CarInit();
 	PersonInit();
 
+
 	
 	p_symbolInit();
 	
 	int32_t P_cx = P_symbol.x + 8/2; 
 	int32_t P_cy = P_symbol.y - 6/2; 	
 
-	uint8_t success = 0;
+	uint8_t success = 0; 
 	uint8_t success2 = 0;
 	
 	while(success == 0){
@@ -524,7 +561,7 @@ int main(void){
  //   Delay100ms(10);
  //   SSD1306_SetCursor(0,0);
  //   SSD1306_OutUDec(time);
-    time-= 0.5;
+    time-= 0.01;
     PF1 ^= 0x02;
 		
 		if(CrashFlag == 1){
@@ -537,7 +574,6 @@ int main(void){
 		ParkingLot();
 		
 		PersonMove();
-		
 		if(NeedToDraw1 == 1){
 			PersonDraw();
 			NeedToDraw1 = 0; 		
@@ -579,7 +615,6 @@ int main(void){
 	}	
 	
 		PersonMove();
-		
 		if(NeedToDraw1 == 1){
 			PersonDraw();
 			NeedToDraw1 = 0; 		
@@ -645,23 +680,24 @@ int main(void){
 				
 	}
 	
-	SSD1306_ClearBuffer();
+SSD1306_ClearBuffer();
 	SSD1306_OutClear();
-	SSD1306_SetCursor(59, 32);
+	SSD1306_SetCursor(4,3);
 	if(lang == 0){
 		SSD1306_OutString("LEVEL 2");
 	}
 	else{
-		SSD1306_OutString("LIVELLO DUE");
+		SSD1306_OutString("LIVELLO 2");
 	}
 	Delay100ms(20);
 	SSD1306_OutClear();
 	
 	CarInit();
 	Car[i].y -= 20;
+	PersonInit();
 	TireInit();
 	
-	//Level TWO
+	//Level TWO ------------------------------------------------
 	while(success2 == 0){
 		
  //   Delay100ms(10);
@@ -680,13 +716,23 @@ int main(void){
 		
 		ParkingLot();
 		
+		SSD1306_OutBuffer();
+
 		PersonMove();
-		
 		if(NeedToDraw1 == 1){
 			PersonDraw();
 			NeedToDraw1 = 0; 		
 			ParkingLot();
 		}
+		
+		TireMove();
+		if(Tire_NTD == 1){
+			TireDraw();
+			Tire_NTD = 0; 
+			ParkingLot();
+		}
+		
+		SSD1306_OutBuffer();
 		
 		Data = ADC_In(); 
 		Position = Convert(Data);
@@ -699,14 +745,14 @@ int main(void){
 		
 		SSD1306_OutBuffer();
 
-		uint8_t CarXinit = Car[0].x + 14; 
+	uint8_t CarXinit = Car[0].x + 14; 
 	uint8_t PerXinit = Person.x + 12;
 	uint8_t CarYinit = Car[0].y - 10;
 	uint8_t PerYinit = Person.y - 14;	
 	uint8_t Xcheck = abs(Car[0].x - Person.x); 
 	uint8_t Ycheck = abs(Car[0].y - Person.y); 
 		
-	if((Xcheck <= 12) && (Ycheck <= 14)){
+	if(((Xcheck <= 12) && (Ycheck <= 14))){
 		for(uint8_t CarX = Car[0].x; CarX <= CarXinit; CarX++){
 			for(uint8_t PerX = Person.x; PerX <= PerXinit; PerX++){
 				if(CarX == PerX){
@@ -723,12 +769,43 @@ int main(void){
 	}	
 	
 		PersonMove();
-		
 		if(NeedToDraw1 == 1){
 			PersonDraw();
 			NeedToDraw1 = 0; 		
 			ParkingLot();
 		}
+
+	SSD1306_OutBuffer();
+		
+	uint8_t TireXinit = Tire.x + 12;
+	uint8_t TireYinit = Tire.y - 11;	
+	uint8_t XTirecheck = abs(Car[0].x - Tire.x); 
+	uint8_t YTirecheck = abs(Car[0].y - Tire.y); 
+		
+	if((XTirecheck <= 12) && (YTirecheck <= 11)){
+		for(uint8_t CarX = Car[0].x; CarX <= CarXinit; CarX++){
+			for(uint8_t TireX = Tire.x; TireX <= TireXinit; TireX++){
+				if(CarX == TireX){
+					for(uint8_t CarY = Car[0].y; CarY >= CarYinit; CarY--){
+						for(uint8_t TireY = Tire.y; TireY >= TireYinit; TireY--){
+							if(CarY == TireY){
+								CrashFlag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+		TireMove();
+		if(Tire_NTD == 1){
+			TireDraw();
+			Tire_NTD = 0; 
+			ParkingLot();
+		}
+		
+		SSD1306_OutBuffer();
 		
 		Data = ADC_In(); 
 		Position = Convert(Data);
@@ -788,11 +865,11 @@ int main(void){
 		}
 				
 	}
-	
+		
 	
 	SSD1306_OutClear(); 
 	while(1){ 
-		SSD1306_SetCursor(1, 1);
+		SSD1306_SetCursor(2, 2);
 		if(lang == 0){
 			SSD1306_OutString("END OF GAME");
 		}
