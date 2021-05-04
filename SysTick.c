@@ -5,7 +5,7 @@
 #include "../inc/tm4c123gh6pm.h"
 #include "Switch.h"
 #include "ADC.h"
-//extern void ChooseLang(void); 
+
 extern void CarMove(void); 
 
 
