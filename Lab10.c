@@ -246,24 +246,6 @@ void handicapInit(void){
 	Handicap.vy = 0;
 }
 
-//uint8_t HCapDirFlag = 1; 
-
-/*void handicapMove(void){
-//	Tire_NTD = 1; 
-	if(HCapDirFlag == 1){
-		if(Handicap.x == 80){   // 1 step before bottom
-			HCapDirFlag = 0; 
-		}
-		Handicap.x += 1;
-	}
-	else if(HCapDirFlag == 0){
-		if(Handicap.x == 1){  // 1 step before top 
-			HCapDirFlag = 1; 
-		}
-		Handicap.x -= 1; 
-	}
-}
-*/
 void handicapDraw(void){
 //	SSD1306_ClearBuffer();
 	Handicap.image = handicapSmall; 
@@ -445,10 +427,7 @@ void ChooseLang(void){
 	SSD1306_OutString("sinistro per");
 		SSD1306_SetCursor(3,7);
 	SSD1306_OutString("l'italiano");
-	//while(((GPIO_PORTF_DATA_R & 0x01) == 0x01) && ((GPIO_PORTF_DATA_R & 0x010) == 0x10)){
-	//};
-	while(done != 1){
-	};
+	while(done != 1){};
 	SSD1306_OutClear();
 }
 
@@ -465,17 +444,8 @@ int main(void){
 	SysTick_Init(4000000); 
 	ADC_Init();
 	Switch_Init();
-//	Sound_Init(); 
-//	playSound(BoomSound); 
-/*	
-  SSD1306_ClearBuffer();
-  SSD1306_DrawBMP(2, 62, SpaceInvadersMarquee, 0, SSD1306_WHITE);
 
-  SSD1306_OutBuffer();
-*/
   EnableInterrupts();
- // Delay100ms(2);
-
 
   SSD1306_ClearBuffer();
 	playSound(Accel); 
@@ -490,9 +460,6 @@ int main(void){
 
 
 	SSD1306_DrawBMP(80, 60, p, 0, SSD1306_WHITE);
-
-//  SSD1306_OutBuffer();
- // Delay100ms(300);
  
 	CarInit();
 	PersonInit();
@@ -504,7 +471,6 @@ int main(void){
 	int32_t P_cx = P_symbol.x + 8/2; 
 	int32_t P_cy = P_symbol.y - 6/2; 	
 
-//	uint8_t success = 0; 
 	uint8_t success2 = 0;
 	
 	while(success == 0){
@@ -534,8 +500,7 @@ int main(void){
 			NeedToDraw = 0; 
 			ParkingLot();
 		}
-		
-		
+			
 		SSD1306_OutBuffer();
 
 		uint8_t CarXinit = Car[0].x + 14; 
