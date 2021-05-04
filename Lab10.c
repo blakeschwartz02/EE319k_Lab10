@@ -179,13 +179,13 @@ uint8_t DirFlag = 1;
 void PersonMove(void){
 	NeedToDraw1 = 1; 
 	if(DirFlag == 1){
-		if(Person.y == 61){   // 1 step before bottom
+		if(Person.y >= 61){   // 1 step before bottom
 			DirFlag = 0; 
 		}
 		Person.y += 1;
 	}
 	else if(DirFlag == 0){
-		if(Person.y == 15){  // 1 step before top 
+		if(Person.y <= 15){  // 1 step before top 
 			DirFlag = 1; 
 		}
 		Person.y -= 1; 
@@ -193,7 +193,7 @@ void PersonMove(void){
 }
 
 void PersonDraw(void){
-	SSD1306_ClearBuffer();
+	//SSD1306_ClearBuffer();
 	Person.image = person;
 	SSD1306_DrawBMP(Person.x, Person.y, Person.image, 0, SSD1306_WHITE); 
 }
