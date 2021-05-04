@@ -18,6 +18,7 @@ extern int CarFlag;
 extern uint32_t Position; 
 extern uint8_t NeedToDraw; 
 extern int lang;
+extern int done;
 
 struct State;
 
