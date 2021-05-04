@@ -13,7 +13,7 @@
 
 extern const uint8_t explosion[]; 
 
-typedef enum {Engine, Explosion, BoomSound, FLaunch, Alarm, Win} soundEffect; 
+typedef enum {Engine, Explosion, BoomSound, Alarm, Win, Accel} soundEffect; 
 
 extern uint32_t pIndex;
 void playSample(void);
