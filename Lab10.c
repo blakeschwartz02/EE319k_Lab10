@@ -402,6 +402,7 @@ void ParkingLot(void){
 }
 
 double time= 1000;
+double time2 = 1000;
 
 void ParkSuccess(void){
 	// success sound interrupt 
@@ -420,7 +421,27 @@ void ParkSuccess(void){
 		SSD1306_OutString("PUNTO:");
 	}
 	SSD1306_OutUDec(time); 
-  Delay100ms(40);	
+  Delay100ms(25);	
+}
+
+void ParkSuccess2(void){
+	// success sound interrupt 
+	playSound(Win); 
+  SSD1306_ClearBuffer();
+  SSD1306_OutClear(); 
+  SSD1306_SetCursor(3, 2);
+	if(lang == 0){
+		SSD1306_OutString("LEVEL 2 COMPLETE\n");	
+		SSD1306_SetCursor(4, 4);
+		SSD1306_OutString("Score:");	
+	}
+	else{
+		SSD1306_OutString("LIVELLO 2 COMPLETO\n");	
+		SSD1306_SetCursor(4, 4);
+		SSD1306_OutString("PUNTO:");
+	}
+	SSD1306_OutUDec(time + time2); 
+  Delay100ms(25);	
 }
 
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
@@ -495,14 +516,15 @@ int main(void){
 	int32_t P_cx = P_symbol.x + 8/2; 
 	int32_t P_cy = P_symbol.y - 6/2; 	
 
-	uint8_t success = 0; 
+	uint8_t success = 0;
+	uint8_t success2 = 0;
 	
 	while(success == 0){
 		
  //   Delay100ms(10);
  //   SSD1306_SetCursor(0,0);
  //   SSD1306_OutUDec(time);
-    time-= 0.01;
+    time-= 0.5;
     PF1 ^= 0x02;
 		
 		if(CrashFlag == 1){
@@ -623,6 +645,149 @@ int main(void){
 				
 	}
 	
+	SSD1306_ClearBuffer();
+	SSD1306_OutClear();
+	SSD1306_SetCursor(59, 32);
+	if(lang == 0){
+		SSD1306_OutString("LEVEL 2");
+	}
+	else{
+		SSD1306_OutString("LIVELLO DUE");
+	}
+	Delay100ms(20);
+	SSD1306_OutClear();
+	
+	CarInit();
+	Car[i].y -= 20;
+	TireInit();
+	
+	//Level TWO
+	while(success2 == 0){
+		
+ //   Delay100ms(10);
+ //   SSD1306_SetCursor(0,0);
+ //   SSD1306_OutUDec(time);
+    time2-= 1;
+    PF1 ^= 0x02;
+		
+		if(CrashFlag == 1){
+			time2 = 1000;
+			CarInit();
+			Car[i].y -= 20;
+			CarDraw();
+			CrashFlag = 0; 
+		}
+		
+		ParkingLot();
+		
+		PersonMove();
+		
+		if(NeedToDraw1 == 1){
+			PersonDraw();
+			NeedToDraw1 = 0; 		
+			ParkingLot();
+		}
+		
+		Data = ADC_In(); 
+		Position = Convert(Data);
+		if(NeedToDraw == 1){
+			CarDraw(); 
+			NeedToDraw = 0; 
+			ParkingLot();
+		}
+		
+		
+		SSD1306_OutBuffer();
+
+		uint8_t CarXinit = Car[0].x + 14; 
+	uint8_t PerXinit = Person.x + 12;
+	uint8_t CarYinit = Car[0].y - 10;
+	uint8_t PerYinit = Person.y - 14;	
+	uint8_t Xcheck = abs(Car[0].x - Person.x); 
+	uint8_t Ycheck = abs(Car[0].y - Person.y); 
+		
+	if((Xcheck <= 12) && (Ycheck <= 14)){
+		for(uint8_t CarX = Car[0].x; CarX <= CarXinit; CarX++){
+			for(uint8_t PerX = Person.x; PerX <= PerXinit; PerX++){
+				if(CarX == PerX){
+					for(uint8_t CarY = Car[0].y; CarY >= CarYinit; CarY--){
+						for(uint8_t PerY = Person.y; PerY >= PerYinit; PerY--){
+							if(CarY == PerY){
+								CrashFlag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+		PersonMove();
+		
+		if(NeedToDraw1 == 1){
+			PersonDraw();
+			NeedToDraw1 = 0; 		
+			ParkingLot();
+		}
+		
+		Data = ADC_In(); 
+		Position = Convert(Data);
+		if(NeedToDraw == 1){
+			CarDraw(); 
+			NeedToDraw = 0; 
+			ParkingLot();
+		}
+
+		SSD1306_OutBuffer();
+
+		
+		if(((Car[0].x + 14) >= 127) || (Car[0].x <= 0) || ((Car[0].y - 9) <= 0) || (Car[0].y >= 64)){ // hits wall 
+			CrashFlag = 1; 
+		}	
+		
+		int32_t Car_cx = Car[0].x + 14/2; 
+		int32_t Car_cy = Car[0].y - 10/2;		
+		
+		int32_t cx = P_cx - Car_cx;
+		int32_t cy = P_cy - Car_cy;
+
+//		if(((P_cx >> 6)==(Car_cx >> 6)) && ((P_cy >> 5)==(Car_cy >> 5))){
+//		if((abs(P_cx - Car_cx) <= 10) && (abs(P_cy - Car_cy) <= 10)){
+		if((abs(cx) <= 2) && (abs(cy) <= 2) && (CarStop == 1)){
+				success2 = 1; 
+				ParkSuccess2();
+			CrashFlag = 0; 
+		}
+	
+		if(CrashFlag == 1){
+//			playSound(BoomSound);
+//			Clock_Delay1ms(1000); 
+			SSD1306_OutClear();
+//			BoomInit();
+ //			Timer0_Init(&wait, 80000000); 
+
+//			BoomDraw();
+//			SSD1306_OutBuffer(); 	
+	    AmbulanceInit(); 
+		playSound(Alarm);
+			while(Ambulance.x != 120){
+				AmbulanceMove(); 
+				AmbulanceDraw(); 
+				// siren sound interrupt 
+			}
+		  SSD1306_ClearBuffer();
+			SSD1306_OutClear(); 
+			SSD1306_SetCursor(3, 2);
+			if(lang == 0){
+				SSD1306_OutString("LEVEL FAILED\n");
+			}
+			else if(lang == 1){
+				SSD1306_OutString("LIVELLO FALLITO\n");
+			}
+			Delay100ms(10);	
+		}
+				
+	}
 	
 	
 	SSD1306_OutClear(); 
