@@ -36,16 +36,15 @@ void Switch_Init(void){
 	GPIO_PORTE_ICR_R = 0x03; // clear flag1-0
 	GPIO_PORTE_IM_R |= 0x03; // arm interrupt 
 	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000040; // priority 2
-	NVIC_EN0_R = 0x40000000; // enable interrupt 4 in NVIC (Port E) 
-		
 	//PortF
-	SYSCTL_RCGCGPIO_R |= 0x00000020; // activate Port E clock
+		/*
+	SYSCTL_RCGCGPIO_R |= 0x00000020; // activate Port F clock
 	while((SYSCTL_PRGPIO_R & 0x00000020) == 0){};
 	GPIO_PORTF_LOCK_R = 0x4C4F434B;
 	GPIO_PORTF_CR_R = 0x1F;
 	GPIO_PORTF_AMSEL_R &= ~0x11; // disable analog function 
 	GPIO_PORTF_PCTL_R &= ~0x000000FF; // ******* configure as GPIO
-	GPIO_PORTF_DIR_R &= ~0x11; // make PE1-0 inputs
+	GPIO_PORTF_DIR_R &= ~0x11; // make PF4-0 inputs
 	GPIO_PORTF_AFSEL_R &= ~ 0x11; 
 	GPIO_PORTF_DEN_R |= 0x11; 
 	GPIO_PORTF_PUR_R |= 0x11; // pull-up
@@ -54,8 +53,9 @@ void Switch_Init(void){
 	GPIO_PORTF_IEV_R |= 0x11; // PF4,0 rising edge
 	GPIO_PORTF_ICR_R = 0x11; // clear flag4,0
 	GPIO_PORTF_IM_R |= 0x11; // arm interrupt 
-	NVIC_PRI1_R = (NVIC_PRI1_R & 0xFFFFFF00) | 0x00000020; // priority 1
-	NVIC_EN0_R = 0x00000000; // enable interrupt 5 in NVIC (Port F) 
+	NVIC_PRI7_R = (NVIC_PRI7_R & 0xFF00FFFF) | 0x00200000; // priority 1
+	*/
+	NVIC_EN0_R = 0x00000010; // enable interrupt 4 and 5 in NVIC (Port E, Port F) 
 	EnableInterrupts(); 
 }
 
@@ -95,12 +95,23 @@ int CarFlag;
 int St = E; 
 int Input; 
 int lang;
+int done = 0;
  
 uint8_t NeedToDraw = 0; 
 
 void GPIOPortE_Handler(void){
 
 	GPIO_PORTE_ICR_R = 0x03; // ack PE1-0
+	
+	if(done == 0){
+		if((GPIO_PORTE_DATA_R & 0x00000003) == 0x01){
+			lang = 0;
+		}
+		else if((GPIO_PORTE_DATA_R & 0x00000003) == 0x02){
+			lang = 1;
+		}
+		done = 1;
+	}
 	
 	if(Position <= 90){
 		Input = 0x00000000; // bit 2 is 0 for neg 
@@ -113,17 +124,21 @@ void GPIOPortE_Handler(void){
 	NeedToDraw = 1; 
 	Input += (GPIO_PORTE_DATA_R & 0x00000003); // 2 buttons + slide pot
 	St = FSM[St].next[Input]; 
-
 }
 
+/*
 void GPIOPortF_Handler(void){
 	
 	GPIO_PORTF_ICR_R = 0x11;
 	
-	if((GPIO_PORTF_DATA_R & 0x00000011) == 0x00000001){
+	if((GPIO_PORTF_DATA_R & 0x00000011) == 0x01){
 		lang = 0;
+		done = 1;
 	}
-	else if((GPIO_PORTF_DATA_R & 0x00000011) == 0x00000010){
+  else if((GPIO_PORTF_DATA_R & 0x00000011) == 0x10){
 		lang = 1;
+		done = 1;
 	}
 }
+
+*/
